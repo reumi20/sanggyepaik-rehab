@@ -1,13 +1,14 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 
 const ROOMS = [
-  { id: 'electro',   name: '열전기치료실',    password: '1234' },
-  { id: 'exercise',  name: '운동치료실',      password: '1234' },
-  { id: 'pediatric', name: '소아운동치료실',  password: '1234' },
-  { id: 'ot',        name: '작업치료실',      password: '1234' },
-  { id: 'speech',    name: '언어치료실',      password: '1234' },
+  { id: 'electro',   name: '열전기치료실',   password: '1234' },
+  { id: 'exercise',  name: '운동치료실',     password: '1234' },
+  { id: 'pediatric', name: '소아운동치료실', password: '1234' },
+  { id: 'ot',        name: '작업치료실',     password: '1234' },
+  { id: 'speech',    name: '언어치료실',     password: '1234' },
 ]
 
 export default function Home() {
@@ -21,25 +22,27 @@ export default function Home() {
     if (!room) { setError('치료실을 선택해주세요'); return }
     if (password !== room.password) { setError('비밀번호가 틀렸습니다'); return }
     localStorage.setItem('room', selectedRoom)
-    router.push(`/${selectedRoom}`)
+    router.push('/' + selectedRoom)
   }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm">
 
-        {/* 상백이 로고 */}
         <div className="text-center mb-8">
-          <div className="text-4xl mb-2">🏥</div>
-          <h1 className="text-xl font-bold text-gray-800">상계백병원</h1>
-          <p className="text-sm text-gray-500">재활의학과 물리치료실</p>
+          <Image
+            src="/sangbaek.png"
+            alt="상백이"
+            width={100}
+            height={100}
+            className="mx-auto mb-2"
+          />
+          <h1 className="text-xl font-bold text-gray-800">상계백병원 재활치료실</h1>
+          <p className="text-sm text-gray-500">상백이와 홈런해요! ⚾</p>
         </div>
 
-        {/* 치료실 선택 */}
         <div className="mb-4">
-          <label className="text-sm font-medium text-gray-700 mb-2 block">
-            치료실 선택
-          </label>
+          <label className="text-sm font-medium text-gray-700 mb-2 block">치료실 선택</label>
           <select
             value={selectedRoom}
             onChange={e => setSelectedRoom(e.target.value)}
@@ -52,11 +55,8 @@ export default function Home() {
           </select>
         </div>
 
-        {/* 비밀번호 */}
         <div className="mb-6">
-          <label className="text-sm font-medium text-gray-700 mb-2 block">
-            비밀번호
-          </label>
+          <label className="text-sm font-medium text-gray-700 mb-2 block">비밀번호</label>
           <input
             type="password"
             value={password}
@@ -67,12 +67,10 @@ export default function Home() {
           />
         </div>
 
-        {/* 에러 */}
         {error && (
           <p className="text-red-500 text-sm mb-4 text-center">{error}</p>
         )}
 
-        {/* 로그인 버튼 */}
         <button
           onClick={handleLogin}
           className="w-full bg-blue-600 text-white rounded-xl p-3 font-medium hover:bg-blue-700 transition"
@@ -81,7 +79,7 @@ export default function Home() {
         </button>
 
         <p className="text-center text-xs text-gray-400 mt-6">
-          상백이와 홈런! 🏠
+          상백이와 홈런해요! ⚾
         </p>
       </div>
     </div>
