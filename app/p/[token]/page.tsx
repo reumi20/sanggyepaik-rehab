@@ -113,11 +113,15 @@ export default function PatientPage() {
         </div>
 
         {ex?.video_url && (
-          <a href={ex.video_url} target="_blank" rel="noreferrer"
-            className="block w-full bg-white border border-blue-200 text-blue-600 rounded-xl p-3 text-sm font-medium text-center mb-4">
-            ▶ 영상 보기
-          </a>
-        )}
+  <div className="mb-4 rounded-xl overflow-hidden">
+    <iframe
+      src={ex.video_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'www.youtube.com/embed/')}
+      className="w-full aspect-video"
+      allowFullScreen
+    />
+  </div>
+)}
+
 
         <div className="flex gap-3">
           <button
