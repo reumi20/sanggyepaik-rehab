@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 
 const OT_VIDEOS = {
-  adult: 'https://www.youtube.com/watch?v=adult_video_url',
+  adult: https://www.youtube.com/watch?v=upTVy8xOZWY,
   pediatric: 'https://www.youtube.com/watch?v=pediatric_video_url',
 }
 
