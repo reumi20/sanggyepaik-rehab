@@ -3,6 +3,14 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/app/supabase'
 import { QRCodeSVG } from 'qrcode.react'
 
+const BODY_PARTS = [
+  { id: 'shoulder', name: '어깨' },
+  { id: 'lumbar', name: '허리' },
+  { id: 'knee', name: '무릎' },
+  { id: 'facial', name: '안면마비' },
+  { id: 'lymph', name: '림프부종' },
+]
+
 const PHASES = [
   { id: 'early', name: '초기' },
   { id: 'mid', name: '중기' },
@@ -37,6 +45,7 @@ export default function ElectroPage() {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
   const [therapists, setTherapists] = useState<Therapist[]>([])
   const [selectedTherapist, setSelectedTherapist] = useState('')
+  const [selectedBodyPart, setSelectedBodyPart] = useState('')
   const [selectedPhase, setSelectedPhase] = useState('')
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [selectedExercises, setSelectedExercises] = useState<Selected[]>([])
@@ -51,43 +60,35 @@ export default function ElectroPage() {
   const [qrToken, setQrToken] = useState('')
 
   useEffect(() => {
-    supabase
-      .from('therapists')
-      .select('*')
-      .eq('room_tag', 'electro')
-      .eq('is_active', true)
+    supabase.from('therapists').select('*')
+      .eq('room_tag', 'electro').eq('is_active', true)
       .then(({ data }) => setTherapists((data as Therapist[]) || []))
   }, [])
 
   useEffect(() => {
     if (search.length < 1) { setPatients([]); return }
-    supabase
-      .from('patients')
-      .select('*')
+    supabase.from('patients').select('*')
       .eq('room_tag', 'electro')
       .ilike('name', `%${search}%`)
       .then(({ data }) => setPatients((data as Patient[]) || []))
   }, [search])
 
   useEffect(() => {
-    if (!selectedPhase) { setExercises([]); return }
-    supabase
-      .from('exercises')
-      .select('*')
+    if (!selectedBodyPart || !selectedPhase) { setExercises([]); return }
+    supabase.from('exercises').select('*')
       .eq('room_tag', 'electro')
+      .eq('body_part', selectedBodyPart)
       .eq('phase', selectedPhase)
       .eq('is_active', true)
       .then(({ data }) => setExercises((data as Exercise[]) || []))
-  }, [selectedPhase])
+  }, [selectedBodyPart, selectedPhase])
 
   const addPatient = async () => {
     if (!newName.trim()) return
     setLoading(true)
-    const { data } = await supabase
-      .from('patients')
+    const { data } = await supabase.from('patients')
       .insert({ name: newName.trim(), room_tag: 'electro' })
-      .select()
-      .single()
+      .select().single()
     if (data) { setSelectedPatient(data as Patient); setStep('prescribe') }
     setNewName('')
     setLoading(false)
@@ -119,21 +120,18 @@ export default function ElectroPage() {
 
   const handleSave = async () => {
     if (!selectedPatient || !selectedTherapist) {
-      alert('치료사를 선택해주세요')
-      return
+      alert('치료사를 선택해주세요'); return
     }
     setSaving(true)
-    const { data: program } = await supabase
-      .from('programs')
+    const { data: program } = await supabase.from('programs')
       .insert({
         patient_id: selectedPatient.id,
         therapist_id: selectedTherapist,
         room_tag: 'electro',
-        body_part: 'shoulder',
+        body_part: selectedBodyPart,
         phase: selectedPhase,
       })
-      .select()
-      .single()
+      .select().single()
 
     if (!program) { setSaving(false); return }
 
@@ -169,6 +167,7 @@ export default function ElectroPage() {
     setQrToken('')
     setSelectedExercises([])
     setSelectedPhase('')
+    setSelectedBodyPart('')
     setSelectedTherapist('')
     setSelectedPatient(null)
     setStep('search')
@@ -184,12 +183,9 @@ export default function ElectroPage() {
 
         <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
           <h2 className="font-bold text-gray-700 mb-3">환자 검색</h2>
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
+          <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="환자 이름 입력"
-            className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+            className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
           {patients.map(p => (
             <button key={p.id}
               onClick={() => { setSelectedPatient(p); setStep('prescribe') }}
@@ -204,13 +200,10 @@ export default function ElectroPage() {
 
         <div className="bg-white rounded-2xl p-4 shadow-sm">
           <h2 className="font-bold text-gray-700 mb-3">신규 환자 등록</h2>
-          <input
-            value={newName}
-            onChange={e => setNewName(e.target.value)}
+          <input value={newName} onChange={e => setNewName(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && addPatient()}
             placeholder="환자 이름 입력"
-            className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
-          />
+            className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3" />
           <button onClick={addPatient} disabled={loading}
             className="w-full bg-blue-600 text-white rounded-xl p-3 text-sm font-medium">
             {loading ? '등록 중...' : '등록하기'}
@@ -228,12 +221,12 @@ export default function ElectroPage() {
           <h1 className="text-lg font-bold">{selectedPatient?.name} 님</h1>
         </div>
 
+        {/* 치료사 */}
         <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
           <h2 className="font-bold text-gray-700 mb-3">담당 치료사</h2>
           <div className="flex gap-2 flex-wrap">
             {therapists.map(t => (
-              <button key={t.id}
-                onClick={() => setSelectedTherapist(t.id)}
+              <button key={t.id} onClick={() => setSelectedTherapist(t.id)}
                 className={`px-4 py-2 rounded-full text-sm border transition ${
                   selectedTherapist === t.id
                     ? 'bg-blue-600 text-white border-blue-600'
@@ -245,23 +238,45 @@ export default function ElectroPage() {
           </div>
         </div>
 
+        {/* 신체부위 */}
         <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
-          <h2 className="font-bold text-gray-700 mb-3">단계 선택</h2>
-          <div className="grid grid-cols-3 gap-2">
-            {PHASES.map(p => (
-              <button key={p.id}
-                onClick={() => setSelectedPhase(p.id)}
-                className={`p-3 rounded-xl text-sm border transition text-center font-bold ${
-                  selectedPhase === p.id
+          <h2 className="font-bold text-gray-700 mb-3">신체부위 선택</h2>
+          <div className="grid grid-cols-5 gap-2">
+            {BODY_PARTS.map(b => (
+              <button key={b.id}
+                onClick={() => { setSelectedBodyPart(b.id); setSelectedPhase(''); setSelectedExercises([]) }}
+                className={`p-2 rounded-xl text-xs border transition font-bold ${
+                  selectedBodyPart === b.id
                     ? 'bg-blue-600 text-white border-blue-600'
                     : 'bg-white text-gray-600 border-gray-200'
                 }`}>
-                {p.name}
+                {b.name}
               </button>
             ))}
           </div>
         </div>
 
+        {/* 단계 */}
+        {selectedBodyPart && (
+          <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
+            <h2 className="font-bold text-gray-700 mb-3">단계 선택</h2>
+            <div className="grid grid-cols-3 gap-2">
+              {PHASES.map(p => (
+                <button key={p.id}
+                  onClick={() => { setSelectedPhase(p.id); setSelectedExercises([]) }}
+                  className={`p-3 rounded-xl text-sm border transition font-bold ${
+                    selectedPhase === p.id
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'bg-white text-gray-600 border-gray-200'
+                  }`}>
+                  {p.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 운동 목록 */}
         {exercises.length > 0 && (
           <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
             <h2 className="font-bold text-gray-700 mb-1">운동 목록 ({exercises.length}개)</h2>
@@ -283,6 +298,14 @@ export default function ElectroPage() {
                 </button>
               )
             })}
+          </div>
+        )}
+
+        {exercises.length === 0 && selectedBodyPart && selectedPhase && (
+          <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
+            <p className="text-sm text-gray-400 text-center py-4">
+              해당 운동 데이터 준비 중...
+            </p>
           </div>
         )}
 
