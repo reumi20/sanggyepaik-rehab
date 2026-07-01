@@ -22,7 +22,7 @@ export default function PatientPage() {
           programs (
             program_exercises (
               sort_order, sets, reps, freq, side, caution,
-              exercises (name_kr, video_url)
+              exercises (name_kr, video_url, image_url)
             )
           )
         `)
@@ -51,6 +51,7 @@ export default function PatientPage() {
           side: pe.side,
           caution: pe.caution,
           video_url: pe.exercises?.video_url,
+          image_url: pe.exercises?.image_url,
           sort_order: pe.sort_order,
         })) || []
 
@@ -113,15 +114,20 @@ export default function PatientPage() {
         </div>
 
         {ex?.video_url && (
-  <div className="mb-4 rounded-xl overflow-hidden">
-    <iframe
-      src={ex.video_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'www.youtube.com/embed/')}
-      className="w-full aspect-video"
-      allowFullScreen
-    />
-  </div>
-)}
+          <div className="mb-4 rounded-xl overflow-hidden">
+            <iframe
+              src={ex.video_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'www.youtube.com/embed/')}
+              className="w-full aspect-video"
+              allowFullScreen
+            />
+          </div>
+        )}
 
+        {ex?.image_url && (
+          <div className="mb-4 rounded-xl overflow-hidden bg-white border border-gray-200">
+            <img src={ex.image_url} alt={ex.name_kr} className="w-full" />
+          </div>
+        )}
 
         <div className="flex gap-3">
           <button
