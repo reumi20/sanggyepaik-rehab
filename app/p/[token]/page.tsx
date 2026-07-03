@@ -116,9 +116,10 @@ export default function PatientPage() {
         {ex?.video_url && (
           <div className="mb-4 rounded-xl overflow-hidden">
             <iframe
-              src={ex.video_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'www.youtube.com/embed/')}
-              className="w-full aspect-video"
-              allowFullScreen
+              src={ex.video_url
+                .replace('watch?v=', 'embed/')
+                .replace('youtu.be/', 'www.youtube.com/embed/')
+                .replace('youtube.com/shorts/', 'www.youtube.com/embed/')}
             />
           </div>
         )}
