@@ -82,7 +82,16 @@ export default function ElectroPage() {
       .eq('is_active', true)
       .then(({ data }) => setExercises((data as Exercise[]) || []))
   }, [selectedBodyPart, selectedPhase])
-
+const addPatient = async () => {
+  if (!newName.trim()) return
+  setLoading(true)
+  const { data } = await supabase.from('patients')
+    .insert({ name: newName.trim(), room_tag: 'electro' })
+    .select().single()
+  if (data) { setSelectedPatient(data as Patient); setStep('prescribe') }
+  setNewName('')
+  setLoading(false)
+}
   const isImageType = selectedBodyPart === 'facial' || selectedBodyPart === 'lymph'
 
   const handleExerciseClick = (e: Exercise) => {
