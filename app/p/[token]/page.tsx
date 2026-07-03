@@ -131,11 +131,24 @@ export default function PatientPage() {
           </div>
         )}
 
-        {ex?.image_url && (
-          <div className="mb-4 rounded-xl overflow-hidden bg-white border border-gray-200">
-            <img src={ex.image_url} alt={ex.name_kr} className="w-full" />
-          </div>
-        )}
+        {ex?.video_url && (
+  <div className="mb-4 rounded-xl overflow-hidden">
+    <iframe
+      src={(() => {
+        const url = ex.video_url
+        if (url.includes('/shorts/')) {
+          const id = url.split('/shorts/')[1].split('?')[0]
+          return `https://www.youtube.com/embed/${id}`
+        }
+        return url
+          .replace('watch?v=', 'embed/')
+          .replace('youtu.be/', 'www.youtube.com/embed/')
+      })()}
+      className="w-full aspect-[9/16]"
+      allowFullScreen
+    />
+  </div>
+)}
 
         <div className="flex gap-3">
           <button

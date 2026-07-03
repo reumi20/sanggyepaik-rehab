@@ -83,20 +83,16 @@ export default function ElectroPage() {
       .then(({ data }) => setExercises((data as Exercise[]) || []))
   }, [selectedBodyPart, selectedPhase])
 
-  const addPatient = async () => {
-    if (!newName.trim()) return
-    setLoading(true)
-    const { data } = await supabase.from('patients')
-      .insert({ name: newName.trim(), room_tag: 'electro' })
-      .select().single()
-    if (data) { setSelectedPatient(data as Patient); setStep('prescribe') }
-    setNewName('')
-    setLoading(false)
-  }
+  const isImageType = selectedBodyPart === 'facial' || selectedBodyPart === 'lymph'
 
-  const openPopup = (e: Exercise) => {
+  const handleExerciseClick = (e: Exercise) => {
     if (selectedExercises.find(s => s.id === e.id)) return
-    if (selectedExercises.length >= 5) { alert('최대 5개까지 선택 가능합니다'); return }
+    if (isImageType) {
+      setSelectedExercises(prev => [...prev, {
+        ...e, sets: '-', reps: '-', freq: '-', side: '-', caution: e.caution || '',
+      }])
+      return
+    }
     setPopupExercise(e)
     setPopupSets(e.default_sets || '3')
     setPopupReps(e.default_reps || '10회')
@@ -109,11 +105,8 @@ export default function ElectroPage() {
     if (!popupExercise) return
     setSelectedExercises(prev => [...prev, {
       ...popupExercise,
-      sets: popupSets,
-      reps: popupReps,
-      freq: popupFreq,
-      side: popupSide,
-      caution: popupCaution,
+      sets: popupSets, reps: popupReps, freq: popupFreq,
+      side: popupSide, caution: popupCaution,
     }])
     setPopupExercise(null)
   }
@@ -139,12 +132,8 @@ export default function ElectroPage() {
       selectedExercises.map((e, i) => ({
         program_id: program.id,
         exercise_id: e.id,
-        sets: e.sets,
-        reps: e.reps,
-        freq: e.freq,
-        side: e.side,
-        caution: e.caution,
-        sort_order: i + 1,
+        sets: e.sets, reps: e.reps, freq: e.freq,
+        side: e.side, caution: e.caution, sort_order: i + 1,
       }))
     )
 
@@ -221,7 +210,6 @@ export default function ElectroPage() {
           <h1 className="text-lg font-bold">{selectedPatient?.name} 님</h1>
         </div>
 
-        {/* 치료사 */}
         <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
           <h2 className="font-bold text-gray-700 mb-3">담당 치료사</h2>
           <div className="flex gap-2 flex-wrap">
@@ -238,7 +226,6 @@ export default function ElectroPage() {
           </div>
         </div>
 
-        {/* 신체부위 */}
         <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
           <h2 className="font-bold text-gray-700 mb-3">신체부위 선택</h2>
           <div className="grid grid-cols-5 gap-2">
@@ -256,7 +243,6 @@ export default function ElectroPage() {
           </div>
         </div>
 
-        {/* 단계 */}
         {selectedBodyPart && (
           <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
             <h2 className="font-bold text-gray-700 mb-3">단계 선택</h2>
@@ -276,23 +262,21 @@ export default function ElectroPage() {
           </div>
         )}
 
-        {/* 운동 목록 */}
         {exercises.length > 0 && (
           <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
             <h2 className="font-bold text-gray-700 mb-1">운동 목록 ({exercises.length}개)</h2>
-            <p className="text-xs text-gray-400 mb-3">탭하면 처방 입력 · 최대 5개</p>
+            <p className="text-xs text-gray-400 mb-3">
+              {isImageType ? '탭하면 바로 추가' : '탭하면 처방 입력'}
+            </p>
             {exercises.map(e => {
               const isSelected = !!selectedExercises.find(s => s.id === e.id)
               return (
-                <button key={e.id} onClick={() => openPopup(e)}
+                <button key={e.id} onClick={() => handleExerciseClick(e)}
                   className={`w-full text-left p-3 border rounded-xl mb-2 text-sm transition ${
                     isSelected ? 'border-blue-400 bg-blue-50' : 'border-gray-100 hover:border-blue-300'
                   }`}>
                   <div className="flex justify-between items-center">
-                    <div>
-                      <div className="font-medium text-gray-800">{e.name_kr}</div>
-                      <div className="text-gray-400 text-xs mt-1">{e.category} · 난이도 {e.difficulty}</div>
-                    </div>
+                    <div className="font-medium text-gray-800">{e.name_kr}</div>
                     {isSelected && <span className="text-blue-500 text-xs font-bold">✓</span>}
                   </div>
                 </button>
@@ -303,21 +287,16 @@ export default function ElectroPage() {
 
         {exercises.length === 0 && selectedBodyPart && selectedPhase && (
           <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
-            <p className="text-sm text-gray-400 text-center py-4">
-              해당 운동 데이터 준비 중...
-            </p>
+            <p className="text-sm text-gray-400 text-center py-4">해당 운동 데이터 준비 중...</p>
           </div>
         )}
 
         {selectedExercises.length > 0 && (
           <div className="bg-white rounded-2xl p-4 shadow-sm">
-            <h2 className="font-bold text-gray-700 mb-3">처방 목록 ({selectedExercises.length}/5)</h2>
+            <h2 className="font-bold text-gray-700 mb-3">처방 목록 ({selectedExercises.length}개)</h2>
             {selectedExercises.map((e, i) => (
               <div key={e.id} className="flex justify-between items-center p-3 border border-gray-100 rounded-xl mb-2">
-                <div>
-                  <div className="text-sm font-medium text-gray-800">{e.name_kr}</div>
-                  <div className="text-xs text-gray-400">{e.sets}세트 · {e.reps} · {e.freq} · {e.side}</div>
-                </div>
+                <div className="text-sm font-medium text-gray-800">{e.name_kr}</div>
                 <button onClick={() => setSelectedExercises(prev => prev.filter((_, idx) => idx !== i))}
                   className="text-red-400 text-xs">삭제</button>
               </div>
@@ -329,8 +308,7 @@ export default function ElectroPage() {
           </div>
         )}
 
-        <button onClick={resetAll}
-          className="w-full mt-4 p-3 text-sm text-gray-400">
+        <button onClick={resetAll} className="w-full mt-4 p-3 text-sm text-gray-400">
           ← 환자 다시 선택
         </button>
       </div>
@@ -378,13 +356,9 @@ export default function ElectroPage() {
 
             <div className="flex gap-2">
               <button onClick={() => setPopupExercise(null)}
-                className="flex-1 p-3 border border-gray-200 rounded-xl text-sm text-gray-600">
-                취소
-              </button>
+                className="flex-1 p-3 border border-gray-200 rounded-xl text-sm text-gray-600">취소</button>
               <button onClick={confirmPopup}
-                className="flex-grow p-3 bg-blue-600 text-white rounded-xl text-sm font-medium">
-                확인 → 추가
-              </button>
+                className="flex-grow p-3 bg-blue-600 text-white rounded-xl text-sm font-medium">확인 → 추가</button>
             </div>
           </div>
         </div>
@@ -394,11 +368,7 @@ export default function ElectroPage() {
         <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center p-8">
           <h2 className="text-xl font-bold text-gray-800 mb-2">QR 생성 완료!</h2>
           <p className="text-sm text-gray-500 mb-6">환자 폰으로 찍어주세요</p>
-          <QRCodeSVG
-            value={`https://sanggyepaik-rehab.vercel.app/p/${qrToken}`}
-            size={200}
-            className="mb-6"
-          />
+          <QRCodeSVG value={`https://sanggyepaik-rehab.vercel.app/p/${qrToken}`} size={200} className="mb-6" />
           <p className="text-sm text-gray-600 mb-1">{selectedPatient?.name} 님</p>
           <p className="text-xs text-gray-400 mb-8">유효기간 1개월</p>
           <button onClick={resetAll}
