@@ -13,7 +13,7 @@ export default function PatientPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchData = async () => {
       const { data } = await supabase
         .from('assignments')
         .select(`
@@ -58,7 +58,7 @@ export default function PatientPage() {
       setExercises(exList)
       setLoading(false)
     }
-    fetch()
+    fetchData()
   }, [token])
 
   if (loading) return (
@@ -77,6 +77,17 @@ export default function PatientPage() {
   )
 
   const ex = exercises[currentIndex]
+
+  const getEmbedUrl = (url: string) => {
+    if (!url) return ''
+    if (url.includes('/shorts/')) {
+      const id = url.split('/shorts/')[1].split('?')[0]
+      return `https://www.youtube.com/embed/${id}`
+    }
+    return url
+      .replace('watch?v=', 'embed/')
+      .replace('youtu.be/', 'www.youtube.com/embed/')
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -99,13 +110,17 @@ export default function PatientPage() {
           {currentIndex + 1} / {exercises.length}
         </p>
 
-        <div className="bg-blue-700 rounded-2xl p-6 text-white mb-4 min-h-48">
+        <div className="bg-blue-700 rounded-2xl p-6 text-white mb-4">
           <p className="text-xs opacity-60 mb-2">운동 {String(currentIndex + 1).padStart(2, '0')}</p>
           <h2 className="text-xl font-bold mb-3">{ex?.name_kr}</h2>
-          <p className="text-sm opacity-80 mb-1">
-            {ex?.sets}세트 · {ex?.reps} · {ex?.freq}
-          </p>
-          <p className="text-sm opacity-80 mb-4">{ex?.side}</p>
+          {ex?.sets !== '-' && (
+            <p className="text-sm opacity-80 mb-1">
+              {ex?.sets}세트 · {ex?.reps} · {ex?.freq}
+            </p>
+          )}
+          {ex?.side !== '-' && (
+            <p className="text-sm opacity-80 mb-2">{ex?.side}</p>
+          )}
           {ex?.caution && (
             <div className="bg-white bg-opacity-20 rounded-lg p-2 text-xs">
               ⚠️ {ex.caution}
@@ -116,42 +131,18 @@ export default function PatientPage() {
         {ex?.video_url && (
           <div className="mb-4 rounded-xl overflow-hidden">
             <iframe
-              src={(() => {
-  const url = ex.video_url
-  if (url.includes('/shorts/')) {
-    const id = url.split('/shorts/')[1].split('?')[0]
-    return `https://www.youtube.com/embed/${id}`
-  }
-  return url
-    .replace('watch?v=', 'embed/')
-    .replace('youtu.be/', 'www.youtube.com/embed/')
-})()}
-
+              src={getEmbedUrl(ex.video_url)}
+              className="w-full aspect-[9/16]"
+              allowFullScreen
             />
           </div>
         )}
 
-        {ex?.video_url && (
-  <-4 rounded-xl overflow-hidden">
-    <iframe
-      src={(() => {
-        const url = ex.video_url
-        if (url.includes('/shorts/')) {
-          const id = url.split('/shorts/')[1].split('?')[0]
-          return `https://www.youtube.com/embed/${id}`
-        }
-        return url
-          .replace('watch?v=', 'embed/')
-          .replace('youtu.be/', 'www.youtube.com/embed/')
-      })()}
-      {ex?.image_url && (
-  <div className="mb-4 rounded-xl overflow-hidden bg-white border border-gray-200">
-    <img src={ex.image_url} alt={ex.name_kr} className="w-full" />
-  </div>
-)}
-    />
-  </div>
-)}
+        {ex?.image_url && (
+          <div className="mb-4 rounded-xl overflow-hidden bg-white border border-gray-200">
+            <img src={ex.image_url} alt={ex?.name_kr} className="w-full" />
+          </div>
+        )}
 
         <div className="flex gap-3">
           <button
