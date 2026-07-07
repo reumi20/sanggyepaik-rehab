@@ -8,7 +8,9 @@ type Therapist = { id: string; name: string }
 type Exercise = {
   id: string
   name_kr: string
+  default_sets: string
   default_reps: string
+  default_freq: string
   caution: string
 }
 
@@ -59,10 +61,6 @@ export default function PediatricPage() {
     if (selectedExercises.includes(id)) {
       setSelectedExercises(prev => prev.filter(e => e !== id))
     } else {
-      if (selectedExercises.length >= 8) {
-        alert('최대 8개까지 선택 가능합니다')
-        return
-      }
       setSelectedExercises(prev => [...prev, id])
     }
   }
@@ -91,7 +89,9 @@ export default function PediatricPage() {
       selected.map((e, i) => ({
         program_id: program.id,
         exercise_id: e.id,
-        reps: e.default_reps,
+        sets: e.default_sets || '-',
+        reps: e.default_reps || '-',
+        freq: e.default_freq || '-',
         caution: e.caution || '',
         sort_order: i + 1,
       }))
@@ -168,7 +168,6 @@ export default function PediatricPage() {
           <h1 className="text-lg font-bold">{selectedPatient?.name} 님</h1>
         </div>
 
-        {/* 치료사 */}
         <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
           <h2 className="font-bold text-gray-700 mb-3">담당 치료사</h2>
           <div className="flex gap-2 flex-wrap">
@@ -185,25 +184,20 @@ export default function PediatricPage() {
           </div>
         </div>
 
-        {/* 운동 목록 */}
         <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
           <h2 className="font-bold text-gray-700 mb-1">
-            운동 선택 ({selectedExercises.length}/8)
+            운동 선택 ({selectedExercises.length}개)
           </h2>
-          <p className="text-xs text-gray-400 mb-3">최대 8개 선택 가능</p>
+          <p className="text-xs text-gray-400 mb-3">탭하면 선택/해제</p>
           {exercises.length === 0 && (
-            <p className="text-sm text-gray-400 text-center py-4">
-              운동 데이터 준비 중...
-            </p>
+            <p className="text-sm text-gray-400 text-center py-4">운동 데이터 준비 중...</p>
           )}
           {exercises.map(e => {
             const isSelected = selectedExercises.includes(e.id)
             return (
               <button key={e.id} onClick={() => toggleExercise(e.id)}
                 className={`w-full text-left p-3 border rounded-xl mb-2 text-sm transition ${
-                  isSelected
-                    ? 'border-purple-400 bg-purple-50'
-                    : 'border-gray-100 hover:border-purple-300'
+                  isSelected ? 'border-purple-400 bg-purple-50' : 'border-gray-100 hover:border-purple-300'
                 }`}>
                 <div className="flex justify-between items-center">
                   <div>
@@ -224,8 +218,7 @@ export default function PediatricPage() {
           </button>
         )}
 
-        <button onClick={resetAll}
-          className="w-full p-3 text-sm text-gray-400">
+        <button onClick={resetAll} className="w-full p-3 text-sm text-gray-400">
           ← 환자 다시 선택
         </button>
       </div>
@@ -236,9 +229,7 @@ export default function PediatricPage() {
           <p className="text-sm text-gray-500 mb-6">환자 폰으로 찍어주세요</p>
           <QRCodeSVG
             value={`https://sanggyepaik-rehab.vercel.app/p/${qrToken}`}
-            size={200}
-            className="mb-6"
-          />
+            size={200} className="mb-6" />
           <p className="text-sm text-gray-600 mb-1">{selectedPatient?.name} 님</p>
           <p className="text-xs text-gray-400 mb-8">유효기간 1개월</p>
           <button onClick={resetAll}
