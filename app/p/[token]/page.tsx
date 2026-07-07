@@ -22,7 +22,7 @@ export default function PatientPage() {
           programs (
             program_exercises (
               sort_order, sets, reps, freq, side, caution,
-              exercises (name_kr, video_url, image_url)
+              exercises (name_kr, video_url, image_url, description_kr)
             )
           )
         `)
@@ -52,6 +52,7 @@ export default function PatientPage() {
           caution: pe.caution,
           video_url: pe.exercises?.video_url,
           image_url: pe.exercises?.image_url,
+          description_kr: pe.exercises?.description_kr,
           sort_order: pe.sort_order,
         })) || []
 
@@ -111,19 +112,30 @@ export default function PatientPage() {
         </p>
 
         <div className="bg-blue-700 rounded-2xl p-6 text-white mb-4">
-          <p className="text-xs opacity-60 mb-2">운동 {String(currentIndex + 1).padStart(2, '0')}</p>
+          <p className="text-xs opacity-60 mb-2">
+            운동 {String(currentIndex + 1).padStart(2, '0')}
+          </p>
           <h2 className="text-xl font-bold mb-3">{ex?.name_kr}</h2>
-          {ex?.sets !== '-' && (
+
+          {ex?.sets && ex?.sets !== '-' && (
             <p className="text-sm opacity-80 mb-1">
-              {ex?.sets}세트 · {ex?.reps} · {ex?.freq}
+              {ex.sets}세트 · {ex.reps} · {ex.freq}
             </p>
           )}
-          {ex?.side !== '-' && (
-            <p className="text-sm opacity-80 mb-2">{ex?.side}</p>
+
+          {ex?.side && ex?.side !== '-' && (
+            <p className="text-sm opacity-80 mb-2">{ex.side}</p>
           )}
+
           {ex?.caution && (
-            <div className="bg-white bg-opacity-20 rounded-lg p-2 text-xs">
+            <div className="bg-yellow-400 text-yellow-900 rounded-lg p-2 text-xs mb-2">
               ⚠️ {ex.caution}
+            </div>
+          )}
+
+          {ex?.description_kr && (
+            <div className="bg-white bg-opacity-15 rounded-lg p-2 text-xs">
+              {ex.description_kr}
             </div>
           )}
         </div>
