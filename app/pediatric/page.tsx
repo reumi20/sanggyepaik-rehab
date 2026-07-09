@@ -23,7 +23,7 @@ export default function PediatricPage() {
   const [therapists, setTherapists] = useState<Therapist[]>([])
   const [selectedTherapist, setSelectedTherapist] = useState('')
   const [exercises, setExercises] = useState<Exercise[]>([])
-  const [selectedExercises, setSelectedExercises] = useState<string[]>([])
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [qrToken, setQrToken] = useState('')
@@ -58,10 +58,10 @@ export default function PediatricPage() {
   }
 
   const toggleExercise = (id: string) => {
-    if (selectedExercises.includes(id)) {
-      setSelectedExercises(prev => prev.filter(e => e !== id))
+    if (selectedIds.includes(id)) {
+      setSelectedIds(prev => prev.filter(e => e !== id))
     } else {
-      setSelectedExercises(prev => [...prev, id])
+      setSelectedIds(prev => [...prev, id])
     }
   }
 
@@ -69,7 +69,7 @@ export default function PediatricPage() {
     if (!selectedPatient || !selectedTherapist) {
       alert('치료사를 선택해주세요'); return
     }
-    if (selectedExercises.length === 0) {
+    if (selectedIds.length === 0) {
       alert('운동을 선택해주세요'); return
     }
     setSaving(true)
@@ -84,7 +84,8 @@ export default function PediatricPage() {
 
     if (!program) { setSaving(false); return }
 
-    const selected = exercises.filter(e => selectedExercises.includes(e.id))
+    // 선택한 순서대로 저장
+    const selected = selectedIds.map(id => exercises.find(e => e.id === id)!)
     await supabase.from('program_exercises').insert(
       selected.map((e, i) => ({
         program_id: program.id,
@@ -114,7 +115,7 @@ export default function PediatricPage() {
 
   const resetAll = () => {
     setQrToken('')
-    setSelectedExercises([])
+    setSelectedIds([])
     setSelectedTherapist('')
     setSelectedPatient(null)
     setStep('search')
@@ -186,14 +187,15 @@ export default function PediatricPage() {
 
         <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
           <h2 className="font-bold text-gray-700 mb-1">
-            운동 선택 ({selectedExercises.length}개)
+            운동 선택 ({selectedIds.length}개)
           </h2>
-          <p className="text-xs text-gray-400 mb-3">탭하면 선택/해제</p>
+          <p className="text-xs text-gray-400 mb-3">선택한 순서대로 QR에 표시돼요</p>
           {exercises.length === 0 && (
             <p className="text-sm text-gray-400 text-center py-4">운동 데이터 준비 중...</p>
           )}
-          {exercises.map(e => {
-            const isSelected = selectedExercises.includes(e.id)
+          {exercises.map((e, idx) => {
+            const selectedOrder = selectedIds.indexOf(e.id)
+            const isSelected = selectedOrder !== -1
             return (
               <button key={e.id} onClick={() => toggleExercise(e.id)}
                 className={`w-full text-left p-3 border rounded-xl mb-2 text-sm transition ${
@@ -204,17 +206,21 @@ export default function PediatricPage() {
                     <div className="font-medium text-gray-800">{e.name_kr}</div>
                     <div className="text-gray-400 text-xs mt-1">{e.default_reps}</div>
                   </div>
-                  {isSelected && <span className="text-purple-500 text-xs font-bold">✓</span>}
+                  {isSelected && (
+                    <span className="text-purple-500 text-xs font-bold">
+                      {selectedOrder + 1}번째
+                    </span>
+                  )}
                 </div>
               </button>
             )
           })}
         </div>
 
-        {selectedExercises.length > 0 && (
+        {selectedIds.length > 0 && (
           <button onClick={handleSave} disabled={saving}
             className="w-full bg-purple-600 text-white rounded-xl p-3 text-sm font-medium mb-4">
-            {saving ? '저장 중...' : `처방 완료 → QR 생성 (${selectedExercises.length}개)`}
+            {saving ? '저장 중...' : `처방 완료 → QR 생성 (${selectedIds.length}개)`}
           </button>
         )}
 
