@@ -83,7 +83,7 @@ export default function PatientPage() {
     if (!url) return ''
     if (url.includes('/shorts/')) {
       const id = url.split('/shorts/')[1].split('?')[0]
-      return `https://www.youtube.com/embed/${id}`
+      return `https://www.youtube.com/embed/${id}?loop=1&playlist=${id}`
     }
     return url
       .replace('watch?v=', 'embed/')
