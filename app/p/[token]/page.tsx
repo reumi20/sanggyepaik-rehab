@@ -96,7 +96,7 @@ export default function PatientPage() {
         <div className="flex items-center gap-3 mb-2">
           <Image src="/sangbaek.png" alt="상백이" width={60} height={60} />
           <div>
-            <p className="text-xs opacity-70">상백이와 홈런! ⚾</p>
+            <p className="text-xs opacity-70">상백이와 홈런(Home-learn)! ⚾</p>
             <p className="font-bold text-lg">{patientName} 님의 운동</p>
             <p className="text-xs opacity-60">인제대학교 상계백병원</p>
           </div>
