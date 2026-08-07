@@ -4,7 +4,7 @@ import { QRCodeSVG } from 'qrcode.react'
 
 const OT_VIDEOS = {
   adult: 'https://www.youtube.com/watch?v=upTVy8xOZWY',
-  pediatric: 'https://www.youtube.com/watch?v=pediatric_video_url',
+  pediatric: 'https://youtube.com/shorts/evVx6hvprDU',
 }
 
 export default function OTPage() {
@@ -57,9 +57,6 @@ export default function OTPage() {
               size={200}
               className="mb-4"
             />
-            <p className="text-xs text-gray-400">
-              영상 URL 입력 후 사용 가능
-            </p>
           </div>
         )}
       </div>
