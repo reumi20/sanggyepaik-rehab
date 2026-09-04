@@ -84,7 +84,6 @@ export default function PediatricPage() {
 
     if (!program) { setSaving(false); return }
 
-    // 선택한 순서대로 저장
     const selected = selectedIds.map(id => exercises.find(e => e.id === id)!)
     await supabase.from('program_exercises').insert(
       selected.map((e, i) => ({
@@ -193,7 +192,7 @@ export default function PediatricPage() {
           {exercises.length === 0 && (
             <p className="text-sm text-gray-400 text-center py-4">운동 데이터 준비 중...</p>
           )}
-          {exercises.map((e, idx) => {
+          {exercises.map(e => {
             const selectedOrder = selectedIds.indexOf(e.id)
             const isSelected = selectedOrder !== -1
             return (
@@ -237,7 +236,12 @@ export default function PediatricPage() {
             value={`https://sanggyepaik-rehab.vercel.app/p/${qrToken}`}
             size={200} className="mb-6" />
           <p className="text-sm text-gray-600 mb-1">{selectedPatient?.name} 님</p>
-          <p className="text-xs text-gray-400 mb-8">유효기간 1개월</p>
+          <p className="text-xs text-gray-400 mb-4">유효기간 1개월</p>
+          <button
+            onClick={() => window.print()}
+            className="w-full max-w-xs border border-purple-600 text-purple-600 rounded-xl p-3 text-sm font-medium mb-3">
+            🖨️ 인쇄하기
+          </button>
           <button onClick={resetAll}
             className="w-full max-w-xs bg-purple-600 text-white rounded-xl p-3 text-sm font-medium">
             완료 → 새 환자
