@@ -82,17 +82,19 @@ export default function ElectroPage() {
       .eq('is_active', true)
       .then(({ data }) => setExercises((data as Exercise[]) || []))
   }, [selectedBodyPart, selectedPhase])
-const addPatient = async () => {
-  if (!newName.trim()) return
-  setLoading(true)
-  const { data } = await supabase.from('patients')
-    .insert({ name: newName.trim(), room_tag: 'electro' })
-    .select().single()
-  if (data) { setSelectedPatient(data as Patient); setStep('prescribe') }
-  setNewName('')
-  setLoading(false)
-}
+
   const isImageType = selectedBodyPart === 'facial' || selectedBodyPart === 'lymph'
+
+  const addPatient = async () => {
+    if (!newName.trim()) return
+    setLoading(true)
+    const { data } = await supabase.from('patients')
+      .insert({ name: newName.trim(), room_tag: 'electro' })
+      .select().single()
+    if (data) { setSelectedPatient(data as Patient); setStep('prescribe') }
+    setNewName('')
+    setLoading(false)
+  }
 
   const handleExerciseClick = (e: Exercise) => {
     if (selectedExercises.find(s => s.id === e.id)) return
@@ -377,9 +379,16 @@ const addPatient = async () => {
         <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center p-8">
           <h2 className="text-xl font-bold text-gray-800 mb-2">QR 생성 완료!</h2>
           <p className="text-sm text-gray-500 mb-6">환자 폰으로 찍어주세요</p>
-          <QRCodeSVG value={`https://sanggyepaik-rehab.vercel.app/p/${qrToken}`} size={200} className="mb-6" />
+          <QRCodeSVG
+            value={`https://sanggyepaik-rehab.vercel.app/p/${qrToken}`}
+            size={200} className="mb-6" />
           <p className="text-sm text-gray-600 mb-1">{selectedPatient?.name} 님</p>
-          <p className="text-xs text-gray-400 mb-8">유효기간 1개월</p>
+          <p className="text-xs text-gray-400 mb-4">유효기간 1개월</p>
+          <button
+            onClick={() => window.print()}
+            className="w-full max-w-xs border border-blue-600 text-blue-600 rounded-xl p-3 text-sm font-medium mb-3">
+            🖨️ 인쇄하기
+          </button>
           <button onClick={resetAll}
             className="w-full max-w-xs bg-blue-600 text-white rounded-xl p-3 text-sm font-medium">
             완료 → 새 환자

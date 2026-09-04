@@ -1,4 +1,109 @@
 'use client'
+import { useState } from 'react'
+import { QRCodeSVG } from 'qrcode.react'
+
+const OT_VIDEOS = {
+  adult: 'https://www.youtube.com/watch?v=upTVy8xOZWY',
+  pediatric: 'https://youtube.com/shorts/evVx6hvprDU',
+}
+
+export default function OTPage() {
+  const [selected, setSelected] = useState<'adult' | 'pediatric' | null>(null)
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="max-w-md mx-auto">
+        <div className="bg-orange-700 rounded-2xl p-4 mb-6 text-white">
+          <p className="text-xs opacity-70">상계백병원 재활치료실</p>
+          <h1 className="text-lg font-bold">작업치료실</h1>
+        </div>
+
+        <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
+          <h2 className="font-bold text-gray-700 mb-3">대상 선택</h2>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => setSelected('adult')}
+              className={`p-6 rounded-xl border-2 text-center transition ${
+                selected === 'adult'
+                  ? 'border-orange-500 bg-orange-50'
+                  : 'border-gray-200 hover:border-orange-300'
+              }`}>
+              <div className="text-3xl mb-2">🧑</div>
+              <div className="font-bold text-gray-800">성인</div>
+            </button>
+            <button
+              onClick={() => setSelected('pediatric')}
+              className={`p-6 rounded-xl border-2 text-center transition ${
+                selected === 'pediatric'
+                  ? 'border-orange-500 bg-orange-50'
+                  : 'border-gray-200 hover:border-orange-300'
+              }`}>
+              <div className="text-3xl mb-2">👶</div>
+              <div className="font-bold text-gray-800">소아</div>
+            </button>
+          </div>
+        </div>
+
+        {selected && (
+          <div className="bg-white rounded-2xl p-6 shadow-sm flex flex-col items-center">
+            <h2 className="font-bold text-gray-700 mb-2">
+              {selected === 'adult' ? '성인' : '소아'} QR 코드
+            </h2>
+            <p className="text-xs text-gray-400 mb-6">
+              환자 폰으로 찍어주세요
+            </p>
+            <QRCodeSVG
+              value={OT_VIDEOS[selected]}
+              size={200}
+              className="mb-4"
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+저장하고 git push 해줘! 😄
+
+git push 하자
+
+터미널에서:
+
+git add .
+git commit -m "add ot pediatric video"
+git push
+
+😄
+
+열전기도 영상 다 올렸는데. 주의사항은 글씨로 나오는데 설명은 흰바탕에 글씩가 안보이네
+
+app/p/[token]/page.tsx에서 description_kr 부분 찾아서:
+
+tsx
+{ex?.description_kr && (
+  <div className="bg-white bg-opacity-15 rounded-lg p-2 text-xs">
+    {ex.description_kr}
+  </div>
+)}
+
+이렇게 바꿔줘:
+
+tsx
+{ex?.description_kr && (
+  <div className="bg-white rounded-lg p-2 text-xs text-gray-700">
+    {ex.description_kr}
+  </div>
+)}
+
+저장하고 git push 해줘! 😄
+
+아니 전체 다 줘
+
+좋아! app/p/[token]/page.tsx 전체 교체해줘:
+
+tsx
+'use client'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/app/supabase'
 import { useParams } from 'next/navigation'
@@ -96,7 +201,7 @@ export default function PatientPage() {
         <div className="flex items-center gap-3 mb-2">
           <Image src="/sangbaek.png" alt="상백이" width={60} height={60} />
           <div>
-            <p className="text-xs opacity-70">상백이와 홈런(Home-learn)! ⚾</p>
+            <p className="text-xs opacity-70">상백이와 홈런(Home-learn)!</p>
             <p className="font-bold text-lg">{patientName} 님의 운동</p>
             <p className="text-xs opacity-60">인제대학교 상계백병원</p>
           </div>
@@ -134,7 +239,7 @@ export default function PatientPage() {
           )}
 
           {ex?.description_kr && (
-            <div className="bg-white bg-opacity-15 rounded-lg p-2 text-xs">
+            <div className="bg-white rounded-lg p-2 text-xs text-gray-700">
               {ex.description_kr}
             </div>
           )}
