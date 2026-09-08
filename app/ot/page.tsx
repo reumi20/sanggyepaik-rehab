@@ -50,13 +50,18 @@ export default function OTPage() {
               {selected === 'adult' ? '성인' : '소아'} QR 코드
             </h2>
             <p className="text-xs text-gray-400 mb-6">
-              환자 폰으로 찍어주세요
+              폰으로 찍어주세요
             </p>
             <QRCodeSVG
               value={OT_VIDEOS[selected]}
               size={200}
-              className="mb-4"
+              className="mb-6"
             />
+            <button
+              onClick={() => window.print()}
+              className="w-full border border-orange-500 text-orange-500 rounded-xl p-3 text-sm font-medium mb-3">
+              🖨️ 인쇄하기
+            </button>
           </div>
         )}
       </div>
