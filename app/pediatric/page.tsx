@@ -231,7 +231,7 @@ export default function PediatricPage() {
       {qrToken && (
         <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center p-8">
           <h2 className="text-xl font-bold text-gray-800 mb-2">QR 생성 완료!</h2>
-          <p className="text-sm text-gray-500 mb-6">환자 폰으로 찍어주세요</p>
+          <p className="text-sm text-gray-500 mb-6">폰으로 찍어주세요</p>
           <QRCodeSVG
             value={`https://sanggyepaik-rehab.vercel.app/p/${qrToken}`}
             size={200} className="mb-6" />
