@@ -97,7 +97,7 @@ export default function ExercisePage() {
     if (!program) { setSaving(false); return }
 
     await supabase.from('program_exercises').insert(
-      exercises.slice(0, 6).map((e, i) => ({
+      exercises.map((e, i) => ({
         program_id: program.id,
         exercise_id: e.id,
         sets: e.default_sets || '3',
@@ -179,7 +179,6 @@ export default function ExercisePage() {
           <h1 className="text-lg font-bold">{selectedPatient?.name} 님</h1>
         </div>
 
-        {/* 치료사 */}
         <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
           <h2 className="font-bold text-gray-700 mb-3">담당 치료사</h2>
           <div className="flex gap-2 flex-wrap">
@@ -196,12 +195,11 @@ export default function ExercisePage() {
           </div>
         </div>
 
-        {/* 질환 선택 */}
         <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
           <h2 className="font-bold text-gray-700 mb-3">질환 선택</h2>
           <div className="grid grid-cols-2 gap-2">
             {CONDITIONS.map(c => (
-              <button key={c.id} onClick={() => setSelectedCondition(c.id)}
+              <button key={c.id} onClick={() => { setSelectedCondition(c.id); setSelectedPhase('') }}
                 className={`p-3 rounded-xl text-sm border transition font-bold ${
                   selectedCondition === c.id
                     ? 'bg-green-600 text-white border-green-600'
@@ -213,7 +211,6 @@ export default function ExercisePage() {
           </div>
         </div>
 
-        {/* 단계 선택 */}
         {selectedCondition && (
           <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
             <h2 className="font-bold text-gray-700 mb-3">단계 선택</h2>
@@ -232,16 +229,15 @@ export default function ExercisePage() {
           </div>
         )}
 
-        {/* 운동 목록 */}
         {exercises.length > 0 && (
           <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
             <h2 className="font-bold text-gray-700 mb-1">
-              운동 목록 ({Math.min(exercises.length, 6)}개)
+              운동 목록 ({exercises.length}개)
             </h2>
             <p className="text-xs text-gray-400 mb-3">
               해당 단계 운동이 자동으로 처방됩니다
             </p>
-            {exercises.slice(0, 6).map(e => (
+            {exercises.map(e => (
               <div key={e.id}
                 className="p-3 border border-green-100 bg-green-50 rounded-xl mb-2 text-sm">
                 <div className="font-medium text-gray-800">{e.name_kr}</div>
@@ -266,14 +262,17 @@ export default function ExercisePage() {
       {qrToken && (
         <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center p-8">
           <h2 className="text-xl font-bold text-gray-800 mb-2">QR 생성 완료!</h2>
-          <p className="text-sm text-gray-500 mb-6">환자 폰으로 찍어주세요</p>
+          <p className="text-sm text-gray-500 mb-6">폰으로 찍어주세요</p>
           <QRCodeSVG
             value={`https://sanggyepaik-rehab.vercel.app/p/${qrToken}`}
-            size={200}
-            className="mb-6"
-          />
+            size={200} className="mb-6" />
           <p className="text-sm text-gray-600 mb-1">{selectedPatient?.name} 님</p>
-          <p className="text-xs text-gray-400 mb-8">유효기간 1개월</p>
+          <p className="text-xs text-gray-400 mb-4">유효기간 1개월</p>
+          <button
+            onClick={() => window.print()}
+            className="w-full max-w-xs border border-green-600 text-green-600 rounded-xl p-3 text-sm font-medium mb-3">
+            🖨️ 인쇄하기
+          </button>
           <button onClick={resetAll}
             className="w-full max-w-xs bg-green-600 text-white rounded-xl p-3 text-sm font-medium">
             완료 → 새 환자
